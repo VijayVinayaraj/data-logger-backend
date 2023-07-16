@@ -1,0 +1,60 @@
+---
+version: '3.7'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    networks:
+      - backend
+    volumes:
+      - ./mosquitto:/mosquitto:rw
+    ports:
+      - "9001:9001"
+      - "1883:1883"
+  timescale:
+    image: timescale/timescaledb:latest-pg15
+    container_name: timescaleDB
+    volumes: 
+      - type: volume
+        # source: timescale-db # the volume name
+        source: timescale_volume
+        # target: the location in the container where the data are stored
+        target: /var/lib/postgresql/data 
+        read_only: false
+      # Custom postgresql.conf file will be mounted (see command: as well)
+      - type: bind
+        source: ./postgresql_custom.conf
+        target: /postgresql_custom.conf
+        read_only: false
+    env_file: .env
+    networks:
+      - backend
+    environment: 
+      POSTGRES_HOST: timescale
+    command: ["-c", "config_file=/postgresql_custom.conf"]
+    ports: 
+      - 0.0.0.0:5432:5432
+    deploy:
+      restart_policy:
+        condition: on-failure
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    volumes:
+      - 'grafana:/var/lib/grafana'
+    networks:
+      - backend
+    ports:
+      - "3000:3000"
+  python:
+    container_name: python
+    build: ./server
+    networks:
+      - backend
+volumes:
+  timescale_volume:
+  grafana:
+
+networks:
+  backend:
