@@ -16,6 +16,7 @@ def databaseInit():
                                         humidity DOUBLE PRECISION,
                                         lightIntensity INTEGER,
                                         distanceHCSR04 DOUBLE PRECISION,
+                                        temperature DOUBLE PRECISION
                                         gasValue DOUBLE PRECISION
                                     );
                                     """
@@ -71,7 +72,7 @@ def insertDataToDB(data):
     values = []
     for value in data.values():
         values.append(value)
-    valuesStr = f"'{values[0]}',{values[1]},{values[2]},{values[3]},{values[4]},{values[5]},{values[6]},{values[7]}"
+    valuesStr = f"'{values[0]}',{values[1]},{values[2]},{values[3]},{values[4]},{values[5]},{values[6]},{value[7]},{values[8]}"
     insert_query = f"INSERT INTO datalogger ({','.join(data.keys())}) VALUES ({valuesStr}) "
     databaseInsert(insert_query)
     # print(insert_query)
